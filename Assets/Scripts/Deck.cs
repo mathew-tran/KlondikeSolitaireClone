@@ -25,12 +25,15 @@ public class Deck : MonoBehaviour
                 Card cardRef = instance.GetComponent<Card>();
                 cardRef.Setup(rank, suit);
                 yield return new WaitForSeconds(.01f);
-                StartCoroutine(cardRef.DoMove(CardHolder.GetComponent<CardPile>().GetLatestPosition(), Card.MOVE_SPEED.SUPERFAST));
-                yield return new WaitUntil(() => cardRef.IsMoving() == false);
+                yield return CardHolder.GetComponent<CardPile>().TakeCard(cardRef);
             }
         }
     }
 
+    public Card GetTopCard()
+    {
+        return CardHolder.GetComponent<CardPile>().GetTopCard();
+    }
     private IEnumerator ShuffleDeck()
     {
         yield return null;
@@ -39,22 +42,22 @@ public class Deck : MonoBehaviour
         {
             cards.Add(child);
         }
+
         List<Transform> shuffledCards = cards.OrderBy(_ => UnityEngine.Random.value).ToList();
         cards.Reverse();
+
         foreach(Transform card in cards)
         {
-            Card cardRef = card.gameObject.GetComponent<Card>();
+            Card cardRef = card.gameObject.GetComponent<Card>();            
             card.SetParent(null);
             StartCoroutine(cardRef.DoMove(SpawnPosition.position, Card.MOVE_SPEED.SUPERFAST));
             yield return new WaitUntil(() => cardRef.IsMoving() == false);
         }
 
         foreach (Transform card in shuffledCards)
-        {
+        {            
             Card cardRef = card.gameObject.GetComponent<Card>();
-            card.SetParent(CardHolder.transform);
-            StartCoroutine(cardRef.DoMove(CardHolder.GetComponent<CardPile>().GetLatestPosition(), Card.MOVE_SPEED.SUPERFAST));
-            yield return new WaitUntil(() => cardRef.IsMoving() == false);
+            yield return CardHolder.GetComponent<CardPile>().TakeCard(cardRef);
         }
 
 
@@ -68,7 +71,7 @@ public class Deck : MonoBehaviour
     {
         yield return StartCoroutine(SpawnDeck());
         yield return StartCoroutine(ShuffleDeck());
-        CardHolder.GetComponent<CardPile>().FlipExposedCard();
+        OnDeckSetupComplete.Invoke();
     }
 
 }
