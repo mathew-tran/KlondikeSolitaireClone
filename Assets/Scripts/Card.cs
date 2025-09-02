@@ -31,14 +31,12 @@ public class Card : MonoBehaviour
 
     public SUIT CardSuit;
     public RANK CardRank;
-
-    public Action OnFinishedMoving;
-
     public enum MOVE_SPEED
     {
         SLOW,
         MEDIUM,
-        FAST
+        FAST,
+        SUPERFAST
     }
 
     public float GetSpeed(MOVE_SPEED speedType)
@@ -51,11 +49,24 @@ public class Card : MonoBehaviour
                 return .25f;
             case MOVE_SPEED.FAST:
                 return .1f;
+            case MOVE_SPEED.SUPERFAST:
+                return .01f;
 
         }
         return .01f;
     }
+    [SerializeField]
     private bool bIsMoving = false;
+
+    public enum FLIP_STATE
+    {
+        NOT_FLIPPED,
+        FLIPPING,
+        FLIPPED
+    }
+
+    [SerializeField]
+    private FLIP_STATE FlipState = FLIP_STATE.NOT_FLIPPED;
 
     private void SetCardImage()
     {
@@ -166,7 +177,38 @@ public class Card : MonoBehaviour
             bIsMoving = false;
         }
 
-          
+    }
+
+    public IEnumerator DoFlip(MOVE_SPEED speedType)
+    {
+        if (FlipState != FLIP_STATE.NOT_FLIPPED)
+        {
+            Debug.LogError("Attempted to flip card: " + gameObject.name + ", but it was already flipped");
+        }
+        else
+        {
+            FlipState = FLIP_STATE.FLIPPING;
+            yield return StartCoroutine(DoMove(transform.position + new Vector3(0, .5f, 0), MOVE_SPEED.MEDIUM));
+            yield return new WaitForSeconds(.1f);
+
+
+            float progress = 0.0f;
+            float timeToMove = GetSpeed(speedType);
+            Quaternion startRotation = transform.rotation;
+            Quaternion targetRotation = startRotation * Quaternion.Euler(180, 0, 0);
+            while (timeToMove > progress)
+            {
+                progress += Time.deltaTime;
+                float weight = (progress / timeToMove);
+                transform.rotation = Quaternion.Lerp(startRotation, targetRotation, weight);
+                yield return null;
+            }
+
+            FlipState = FLIP_STATE.FLIPPED;
+            yield return StartCoroutine(DoMove(transform.position - new Vector3(0, .5f, 0), MOVE_SPEED.SUPERFAST));
+
+        }
+
     }
 
     public bool IsMoving()
