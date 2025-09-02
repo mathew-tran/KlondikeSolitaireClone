@@ -1,5 +1,6 @@
 using NUnit.Framework.Internal;
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class Card : MonoBehaviour
@@ -32,9 +33,53 @@ public class Card : MonoBehaviour
     public RANK CardRank;
 
     public Action OnFinishedMoving;
+
+    public enum MOVE_SPEED
+    {
+        SLOW,
+        MEDIUM,
+        FAST
+    }
+
+    public float GetSpeed(MOVE_SPEED speedType)
+    {
+        switch(speedType)
+        {
+            case MOVE_SPEED.SLOW:
+                return 1.5f;
+            case MOVE_SPEED.MEDIUM:
+                return .25f;
+            case MOVE_SPEED.FAST:
+                return .1f;
+
+        }
+        return .01f;
+    }
+    private bool bIsMoving = false;
+
     private void SetCardImage()
     {
         string cardName = "Cards/";
+        cardName += GetCardName();
+
+        cardName += "white";
+        Texture2D image = Resources.Load<Texture2D>(cardName);
+
+        if (image)
+        {
+            GetComponent<Renderer>().material.SetTexture("_CardFrontImage", image);
+        }
+        else
+        {
+            Debug.LogError("Could not find image: " + cardName);
+        }
+        
+
+    }
+
+    private string GetCardName()
+    {
+        string cardName = "";
         switch (CardSuit)
         {
             case SUIT.DIAMOND:
@@ -93,25 +138,40 @@ public class Card : MonoBehaviour
                 cardName += "King_";
                 break;
         }
-        cardName += "white";
-        Debug.Log(cardName);
-        Texture2D image = Resources.Load<Texture2D>(cardName);
+        return cardName;
+    }
 
-        if (image)
+    public IEnumerator DoMove(Vector3 target, MOVE_SPEED speedType)
+    {
+        if (bIsMoving)
         {
-            GetComponent<Renderer>().material.SetTexture("_CardFrontImage", image);
+            Debug.LogError("Attempted to move card: " + gameObject.name + ", but it was already moving");
         }
         else
         {
-            Debug.LogError("Could not find image: " + cardName);
-        }
-        
+            bIsMoving = true;
 
+
+            float progress = 0.0f;
+            float timeToMove = GetSpeed(speedType);
+            Vector3 startPosition = transform.position;
+            while (timeToMove > progress)
+            {
+                progress += Time.deltaTime;
+                float weight = (progress / timeToMove);
+                transform.position = Vector3.Lerp(startPosition, target, weight);
+                yield return null;
+            }
+
+            bIsMoving = false;
+        }
+
+          
     }
 
-    public void MoveCard(Vector3 target)
+    public bool IsMoving()
     {
-
+        return bIsMoving;
     }
 
     public void Setup(RANK rank, SUIT suit)
@@ -119,5 +179,6 @@ public class Card : MonoBehaviour
         CardRank = rank;
         CardSuit = suit;
         SetCardImage();
+        gameObject.name = GetCardName();
     }
 }

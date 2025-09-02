@@ -1,31 +1,42 @@
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using System.Linq;
 
 public class Deck : MonoBehaviour
 {
     [SerializeField]
     private GameObject CardPrefab;
 
-    private List<GameObject> Cards = new List<GameObject>();
-    private void SpawnDeck()
+    public Transform mSpawnPosition;
+
+    public GameObject mCardHolder;
+    private IEnumerator SpawnDeck()
     {
-        Vector3 offsetAmount = new Vector3(.01f, .01f, 0);
-        int cardNumber = 0;
         foreach(Card.RANK rank in Enum.GetValues(typeof(Card.RANK))){
             foreach (Card.SUIT suit in Enum.GetValues(typeof(Card.SUIT)))
             {
-                GameObject instance = Instantiate(CardPrefab, transform.position + offsetAmount * cardNumber, transform.rotation);
-                instance.GetComponent<Card>().Setup(rank, suit);
-                Cards.Add(instance);
-                cardNumber += 1;
+                GameObject instance = Instantiate(CardPrefab, mSpawnPosition.position, transform.rotation, mCardHolder.transform);
+                Card cardRef = instance.GetComponent<Card>();
+                cardRef.Setup(rank, suit);
+                yield return new WaitForSeconds(.01f);
+                StartCoroutine(cardRef.DoMove(mCardHolder.GetComponent<CardPile>().GetLatestPosition(), Card.MOVE_SPEED.FAST));
+                yield return new WaitUntil(() => cardRef.IsMoving() == false);
             }
         }
     }
+
+    private IEnumerator ShuffleDeck()
+    {
+        yield return null;
+
+    }
     void Start()
     {
-        SpawnDeck();
+        StartCoroutine(SpawnDeck());
     }
 
 }
