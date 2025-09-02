@@ -73,7 +73,14 @@ public class Card : MonoBehaviour
         string cardName = "Cards/";
         cardName += GetCardName();
 
-        cardName += "white";
+        if (CardSuit == SUIT.DIAMOND || CardSuit == SUIT.HEARTS)
+        {
+            cardName += "white";
+        }
+        else
+        {
+            cardName += "black";
+        }
         Texture2D image = Resources.Load<Texture2D>(cardName);
 
         if (image)
@@ -91,6 +98,7 @@ public class Card : MonoBehaviour
     private string GetCardName()
     {
         string cardName = "";
+        string postPend = "black";
         switch (CardSuit)
         {
             case SUIT.DIAMOND:
@@ -101,6 +109,7 @@ public class Card : MonoBehaviour
                 break;
             case SUIT.HEARTS:
                 cardName += "Hearts_";
+
                 break;
             case SUIT.SPADE:
                 cardName += "Pikes_";
