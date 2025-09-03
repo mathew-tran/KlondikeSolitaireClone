@@ -12,6 +12,12 @@ public class Player : MonoBehaviour
     public List<Card> LookedAtCards = new List<Card>();
     // Update is called once per frame
 
+    public bool bCanPlay = true;
+
+    public void SetPlayerCanPlay(bool bPlayable)
+    {
+        bCanPlay = bPlayable;
+    }
     public bool ProcessDeckHit(GameObject obj)
     {
         Deck deck = obj.GetComponent<Deck>();
@@ -116,6 +122,10 @@ public class Player : MonoBehaviour
     }
     void Update()
     {
+        if (bCanPlay == false)
+        {
+            return;
+        }
         foreach(Card card in LookedAtCards)
         {
             card.ShowHighlight(false);

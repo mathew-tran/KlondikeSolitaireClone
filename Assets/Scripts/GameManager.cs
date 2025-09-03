@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,10 +13,80 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Transform CardHolderSlots;
 
-    private void Start()
+    public CardPile[] CardPiles;
+
+    public Player PlayerReference;
+
+    public enum GAME_STATE
+    {
+        IN_GAME,
+        WIN
+    }
+
+    public GAME_STATE CurrentState = GAME_STATE.IN_GAME;
+
+    public Action OnGameOver;
+
+    private void Awake()
     {
         DeckReference.OnDeckSetupComplete += OnDeckSetupComplete;
+
+        OnGameOver += DoGameOver;
+        CardPiles = GameObject.FindObjectsByType(typeof(CardPile), FindObjectsSortMode.None) as CardPile[];
+        foreach (CardPile pile in CardPiles)
+        {
+            if (pile.PileType != CardPile.PILE_TYPE.FOUNDATION)
+            {
+                pile.OnCardPlaced += CheckGameOver;
+            }
+        }
     }
+
+    private void OnDestroy()
+    {
+        DeckReference.OnDeckSetupComplete -= OnDeckSetupComplete;
+        OnGameOver -= DoGameOver;
+
+        foreach (CardPile pile in CardPiles)
+        {
+            if (pile.PileType != CardPile.PILE_TYPE.FOUNDATION)
+            {
+                pile.OnCardPlaced -= CheckGameOver;
+            }
+        }
+    }
+
+    public void DoGameOver()
+    {
+        PlayerReference.SetPlayerCanPlay(false);
+    }
+    public void CheckGameOver()
+    {
+        if (DeckReference.DeckState == Deck.DECK_STATE.NON_INITIALIZED)
+        {
+            return;
+        }
+        if (CurrentState != GAME_STATE.IN_GAME)
+        {
+            return;
+        }
+        foreach (CardPile pile in CardPiles)
+        {
+            if (pile.PileType != CardPile.PILE_TYPE.FOUNDATION)
+            {
+                {
+                    if (pile.HasCards())
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+        CurrentState = GameManager.GAME_STATE.WIN;
+        Debug.Log("Game Over");
+        OnGameOver?.Invoke();
+    }
+
 
     private void Update()
     {

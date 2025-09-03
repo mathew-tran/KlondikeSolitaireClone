@@ -16,10 +16,12 @@ public class Deck : MonoBehaviour
 
     public Transform SpawnPosition;
 
-    public GameObject CardHolder;
+    public CardPile CardHolder;
     public CardPile HandPile;
+ 
 
     public Action OnDeckSetupComplete;
+   
 
     public enum DECK_STATE
     {
@@ -27,6 +29,9 @@ public class Deck : MonoBehaviour
         DRAWING,
         INITIALIZED
     }
+
+
+
 
 
     public DECK_STATE DeckState;
@@ -39,6 +44,11 @@ public class Deck : MonoBehaviour
         }
         else
         {
+            int seed = (int)DateTime.Now.Ticks;
+            Debug.Log("Start Game with Seed: " + seed);
+
+            UnityEngine.Random.InitState(seed);
+
             DeckState = DECK_STATE.NON_INITIALIZED;
             List<Tuple<Card.SUIT, Card.RANK>> cardData = new List<Tuple<Card.SUIT, Card.RANK>>();
             foreach (Card.RANK rank in Enum.GetValues(typeof(Card.RANK)))
@@ -56,7 +66,7 @@ public class Deck : MonoBehaviour
                 GameObject instance = Instantiate(CardPrefab, SpawnPosition.position, transform.rotation, CardHolder.transform);
                 Card cardRef = instance.GetComponent<Card>();
                 cardRef.Setup(tuple.Item2, tuple.Item1);
-                yield return CardHolder.GetComponent<CardPile>().TakeCard(cardRef);
+                yield return CardHolder.TakeCard(cardRef);
             }
             DeckState = DECK_STATE.INITIALIZED;
         }
@@ -83,7 +93,7 @@ public class Deck : MonoBehaviour
 
                 foreach (Transform child in cards)
                 {
-                    StartCoroutine(CardHolder.GetComponent<CardPile>().TakeCardAndFlip(false, child.GetComponent<Card>(), MOVE_SPEED.MEDIUM));
+                    StartCoroutine(CardHolder.TakeCardAndFlip(false, child.GetComponent<Card>(), MOVE_SPEED.MEDIUM));
                 }
                 yield return new WaitForSeconds(.2f);
             }
@@ -93,7 +103,7 @@ public class Deck : MonoBehaviour
 
     public Card GetTopCard()
     {
-        return CardHolder.GetComponent<CardPile>().GetTopCard();
+        return CardHolder.GetTopCard();
     }
     private IEnumerator ShuffleDeck()
     {
@@ -119,7 +129,7 @@ public class Deck : MonoBehaviour
         foreach (Transform card in shuffledCards)
         {            
             Card cardRef = card.gameObject.GetComponent<Card>();
-            yield return CardHolder.GetComponent<CardPile>().TakeCard(cardRef);
+            yield return CardHolder.TakeCard(cardRef);
         }
 
 

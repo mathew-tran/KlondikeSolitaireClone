@@ -1,4 +1,5 @@
 using NUnit.Framework.Constraints;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,8 @@ public class CardPile : MonoBehaviour
     }
 
     public PILE_TYPE PileType;
+
+    public Action OnCardPlaced;
     public IEnumerator TakeCard(Card card, Card.MOVE_SPEED moveSpeed = Card.MOVE_SPEED.SUPERFAST)
     {
         card.gameObject.transform.SetParent(transform);
@@ -26,6 +29,7 @@ public class CardPile : MonoBehaviour
         card.LastPosition = card.GetCardPile().GetLatestPosition();
         card.gameObject.layer = LayerMask.NameToLayer("Card");
         yield return new WaitUntil(() => card.IsMoving() == false);
+        OnCardPlaced?.Invoke();
     }
 
     public List<Card> GetCardAndSiblings(Card card)
@@ -34,7 +38,6 @@ public class CardPile : MonoBehaviour
 
         for (int i =  card.transform.GetSiblingIndex(); i < transform.childCount; ++i)
         {
-            Debug.Log(i);
             pile.Add(transform.GetChild(i).GetComponent<Card>());
         }
 
