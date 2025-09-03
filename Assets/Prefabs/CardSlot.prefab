@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2622225761470013097}
   - component: {fileID: 7856829093449731029}
   - component: {fileID: 7589252962970867675}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: CardSlot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,3 +124,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11978515d85f47f49a114f76302e136a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CardPile
+  PileType: 0

@@ -67,6 +67,11 @@ public class Card : MonoBehaviour
         return .01f;
     }
 
+    public enum STACK_TYPE
+    {
+        HOLDER,
+        FOUNDATION
+    }
     public enum FLIP_STATE
     {
         NOT_FLIPPED,
@@ -110,9 +115,21 @@ public class Card : MonoBehaviour
             gameObject.layer = LayerMask.NameToLayer("IgnoredCard");
         }
     }
-    public bool CanStackCard(Card card)
+    public bool CanStackCard(Card card, STACK_TYPE stackType)
     {
-        return card.CardColor != CardColor && CardRank == card.CardRank + 1;
+        if (FlipState == FLIP_STATE.NOT_FLIPPED)
+        {
+            return false;
+        }
+        if (stackType == STACK_TYPE.HOLDER)
+        {
+            return card.CardColor != CardColor && CardRank == card.CardRank + 1;
+        }
+        else
+        {
+            return card.CardSuit == CardSuit && CardRank == card.CardRank -1;
+        }
+       
     }
     public bool CanDrag()
     {
@@ -276,6 +293,38 @@ public class Card : MonoBehaviour
             }
 
             FlipState = FLIP_STATE.FLIPPED;
+            yield return StartCoroutine(DoMove(transform.position - new Vector3(0, .5f, 0), MOVE_SPEED.SUPERFAST));
+
+        }
+
+    }
+
+    public IEnumerator DoUnFlip(MOVE_SPEED speedType)
+    {
+        if (FlipState != FLIP_STATE.FLIPPED)
+        {
+            Debug.LogError("Attempted to unflip card: " + gameObject.name + ", but it was already flipped");
+        }
+        else
+        {
+            FlipState = FLIP_STATE.FLIPPING;
+            yield return StartCoroutine(DoMove(transform.position + new Vector3(0, .5f, 0), MOVE_SPEED.MEDIUM));
+            yield return new WaitForSeconds(.1f);
+
+
+            float progress = 0.0f;
+            float timeToMove = GetSpeed(speedType);
+            Quaternion startRotation = transform.rotation;
+            Quaternion targetRotation = startRotation * Quaternion.Euler(180, 0, 0);
+            while (timeToMove > progress)
+            {
+                progress += Time.deltaTime;
+                float weight = (progress / timeToMove);
+                transform.rotation = Quaternion.Lerp(startRotation, targetRotation, weight);
+                yield return null;
+            }
+
+            FlipState = FLIP_STATE.NOT_FLIPPED;
             yield return StartCoroutine(DoMove(transform.position - new Vector3(0, .5f, 0), MOVE_SPEED.SUPERFAST));
 
         }
