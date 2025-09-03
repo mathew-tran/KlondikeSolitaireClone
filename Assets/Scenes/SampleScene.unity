@@ -1106,6 +1106,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1284650967}
   - component: {fileID: 1284650966}
+  - component: {fileID: 1284650968}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1134,7 +1135,8 @@ MonoBehaviour:
   IgnoreCardLayer:
     serializedVersion: 2
     m_Bits: 128
-  CardFocused: {fileID: 0}
+  LastPile: {fileID: 0}
+  LookedAtCards: []
 --- !u!4 &1284650967
 Transform:
   m_ObjectHideFlags: 0
@@ -1150,6 +1152,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1284650968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284650965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11978515d85f47f49a114f76302e136a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CardPile
+  PileType: 4
 --- !u!4 &1387730194 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 621228708288500561, guid: 39c9a75b727295d4994bff93326ace71, type: 3}

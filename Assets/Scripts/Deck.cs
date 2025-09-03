@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using static Card;
 using static Deck;
+using static UnityEngine.Rendering.GPUSort;
 
 public class Deck : MonoBehaviour
 {
@@ -23,8 +24,10 @@ public class Deck : MonoBehaviour
     public enum DECK_STATE
     {
         NON_INITIALIZED,
+        DRAWING,
         INITIALIZED
     }
+
 
     public DECK_STATE DeckState;
     private IEnumerator SpawnDeck()
@@ -59,23 +62,32 @@ public class Deck : MonoBehaviour
         }
     }
 
-    public void DeckClicked()
+    public IEnumerator DeckClicked()
     {
         if (DeckState == DECK_STATE.INITIALIZED)
         {
+            DeckState = DECK_STATE.DRAWING;
             Card TopCard = GetTopCard();
             if (TopCard)
             {
-                StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.INSTANT));
+                yield return StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.MEDIUM));
 
             }
             else
             {
-                foreach(Transform child in HandPile.transform)
+                List<Transform> cards = new List<Transform>();
+                foreach (Transform child in HandPile.transform)
                 {
-                    StartCoroutine(CardHolder.GetComponent<CardPile>().TakeCardAndFlip(false, child.GetComponent<Card>(), MOVE_SPEED.INSTANT));
+                    cards.Add(child);
                 }
+
+                foreach (Transform child in cards)
+                {
+                    StartCoroutine(CardHolder.GetComponent<CardPile>().TakeCardAndFlip(false, child.GetComponent<Card>(), MOVE_SPEED.MEDIUM));
+                }
+                yield return new WaitForSeconds(.2f);
             }
+            DeckState = DECK_STATE.INITIALIZED;
         }
     }
 

@@ -1,6 +1,8 @@
 using NUnit.Framework.Constraints;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
 using static Card;
 
 public class CardPile : MonoBehaviour
@@ -10,7 +12,8 @@ public class CardPile : MonoBehaviour
         DECK, // This is the deck where it should build up
         HOLDER, // This is the bottom piles
         FOUNDATION, // This is the foundation where the top card should be seen only
-        HAND //
+        HAND, //
+        PLAYER
     }
 
     public PILE_TYPE PileType;
@@ -19,9 +22,23 @@ public class CardPile : MonoBehaviour
         card.gameObject.transform.SetParent(transform);
         StartCoroutine(card.DoMove(GetComponent<CardPile>().GetLatestPosition(), moveSpeed));
         card.RenderQueueLayer = 3000 + transform.childCount;
-        card.gameObject.GetComponent<Renderer>().material.renderQueue = card.RenderQueueLayer;
+        card.AdjustRenderLayer(0);
         card.LastPosition = card.GetCardPile().GetLatestPosition();
+        card.gameObject.layer = LayerMask.NameToLayer("Card");
         yield return new WaitUntil(() => card.IsMoving() == false);
+    }
+
+    public List<Card> GetCardAndSiblings(Card card)
+    {
+        List<Card> pile = new List<Card>();
+
+        for (int i =  card.transform.GetSiblingIndex(); i < transform.childCount; ++i)
+        {
+            Debug.Log(i);
+            pile.Add(transform.GetChild(i).GetComponent<Card>());
+        }
+
+        return pile;
     }
 
     public IEnumerator TakeCardAndFlip(bool bFlipped, Card card, Card.MOVE_SPEED moveSpeed = Card.MOVE_SPEED.SUPERFAST)
@@ -29,12 +46,12 @@ public class CardPile : MonoBehaviour
         yield return StartCoroutine(TakeCard(card, moveSpeed));
         if (bFlipped)
         {
-            yield return StartCoroutine(card.DoFlip(MOVE_SPEED.FAST));
+            yield return StartCoroutine(card.DoFlip(MOVE_SPEED.SUPERFAST));
             
         }
         else
         {
-            yield return StartCoroutine(card.DoUnFlip(MOVE_SPEED.FAST));
+            yield return StartCoroutine(card.DoUnFlip(MOVE_SPEED.SUPERFAST));
         }
 
        
@@ -77,6 +94,7 @@ public class CardPile : MonoBehaviour
                 Vector3 offsetAmount = new Vector3(0f, .01f, .01f);
                 return ((transform.childCount - 1) * offsetAmount) + transform.position + offset;
             case PILE_TYPE.HOLDER:
+            case PILE_TYPE.PLAYER:
                 Vector3 holderOffsetAmount = new Vector3(0f, .2f, -.55f);
                 return ((transform.childCount - 1) * holderOffsetAmount) + transform.position + offset;
             case PILE_TYPE.FOUNDATION:
@@ -90,15 +108,25 @@ public class CardPile : MonoBehaviour
        
     }
 
-
+    public bool HasCards()
+    {
+        return transform.childCount > 0;
+    }
     public Card GetTopCard()
     {
         if (transform.childCount <= 0)
         {
-            Debug.LogError("Attempted to flip a non existant card for pile: " + gameObject.name);
             return null;
         }
         return transform.GetChild(transform.childCount - 1).GetComponent<Card>();
+    }
+    public Card GetBottomCard()
+    {
+        if (transform.childCount <= 0)
+        {
+            return null;
+        }
+        return transform.GetChild(0).GetComponent<Card>();
     }
     public IEnumerator AttemptFlipExposedCard()
     {

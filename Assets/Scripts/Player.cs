@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -5,7 +7,9 @@ public class Player : MonoBehaviour
     public LayerMask HitLayerMask;
     public LayerMask BoardMask;
     public LayerMask IgnoreCardLayer;
-    public Card CardFocused;
+    public CardPile LastPile;
+
+    public List<Card> LookedAtCards = new List<Card>();
     // Update is called once per frame
 
     public bool ProcessDeckHit(GameObject obj)
@@ -17,7 +21,7 @@ public class Player : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(0))
         {
-            deck.DeckClicked();
+            StartCoroutine(deck.DeckClicked());
         }
         return true;
     }
@@ -29,15 +33,30 @@ public class Player : MonoBehaviour
             return false;
         }
         
-       
-        if (CardFocused == null)
+        
+        if (GetComponent<CardPile>().HasCards() == false)
         {
+            if (card.CanDrag())
+            {
+                CardPile pile = card.GetCardPile();
+                foreach (Card foundCards in pile.GetCardAndSiblings(card))
+                {
+                    LookedAtCards.Add(foundCards);
+                    foundCards.ShowHighlight(true);
+                }
+
+            }
             if (Input.GetMouseButtonDown(0))
             {
                 if (card.CanDrag())
                 {
-                    CardFocused = card;
-                    CardFocused.SetTargetability(false);
+                    LastPile = card.GetCardPile();
+
+                    foreach (Card foundCards in LastPile.GetCardAndSiblings(card))
+                    {
+                        StartCoroutine(GetComponent<CardPile>().TakeCard(foundCards));
+                    }
+                    
                     return true;
                 }
             }
@@ -49,12 +68,14 @@ public class Player : MonoBehaviour
             {
                 if (card.CanDrag())
                 {
-                    if (card.GetCardPile().CanTakeCard(CardFocused))
+                    if (card.GetCardPile().CanTakeCard(GetComponent<CardPile>().GetBottomCard()))
                     {
-                        var oldCardPile = CardFocused.GetCardPile();
-                        StartCoroutine(card.GetCardPile().TakeCard(CardFocused));
-                        StartCoroutine(oldCardPile.AttemptFlipExposedCard());
-                        ReleaseCard();
+                        while(GetComponent<CardPile>().GetBottomCard())
+                        {
+                            StartCoroutine(card.GetCardPile().TakeCard(GetComponent<CardPile>().GetBottomCard()));
+                        }
+                        
+                        StartCoroutine(LastPile.AttemptFlipExposedCard());
                         return true;
                     }
 
@@ -75,16 +96,18 @@ public class Player : MonoBehaviour
             return false;
         }
 
-        if (CardFocused)
+        if (GetComponent<CardPile>().HasCards())
         {
             if (Input.GetMouseButton(0) == false)
             {
-                if (cardPile.CanTakeCard(CardFocused))
+                if (cardPile.CanTakeCard(GetComponent<CardPile>().GetBottomCard()))
                 {
-                    var oldCardPile = CardFocused.GetCardPile();
-                    StartCoroutine(cardPile.TakeCard(CardFocused));
-                    StartCoroutine(oldCardPile.AttemptFlipExposedCard());
-                    ReleaseCard();
+                    while (GetComponent<CardPile>().GetBottomCard())
+                    {
+                        StartCoroutine(cardPile.TakeCard(GetComponent<CardPile>().GetBottomCard()));
+                    }
+
+                    StartCoroutine(LastPile.AttemptFlipExposedCard());
                     return true;
                 }
             }
@@ -93,6 +116,12 @@ public class Player : MonoBehaviour
     }
     void Update()
     {
+        foreach(Card card in LookedAtCards)
+        {
+            card.ShowHighlight(false);
+        }
+        LookedAtCards.Clear();
+
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit, 100, HitLayerMask)) {
@@ -115,10 +144,14 @@ public class Player : MonoBehaviour
 
         if (Input.GetMouseButtonUp(0))
         {
-            if (CardFocused != null)
+            foreach (Transform child in transform)
             {
-                StartCoroutine(CardFocused.RevertToLastPosition());
-                ReleaseCard();
+                child.GetComponent<Card>().AdjustRenderLayer(0);
+                child.gameObject.layer = LayerMask.NameToLayer("Card");
+                while (GetComponent<CardPile>().GetBottomCard())
+                {
+                    StartCoroutine(LastPile.TakeCard(GetComponent<CardPile>().GetBottomCard()));
+                }
             }
         }
         AttemptDragCard();
@@ -126,26 +159,19 @@ public class Player : MonoBehaviour
 
     }
 
-    private void ReleaseCard()
-    {
-        CardFocused.SetTargetability(true);
-        CardFocused.AdjustRenderLayer(0);
-        CardFocused = null;
-    }
-
     public void AttemptDragCard()
     {
-        if (CardFocused == null)
-        {
-            return;
-        }
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit, 100, BoardMask))
         {
-            
-            CardFocused.AdjustRenderLayer(1000);
-            CardFocused.gameObject.transform.position = hit.point - ray.direction * 2;
+
+            gameObject.transform.position = hit.point - ray.direction * 2;
+        }        
+        foreach(Transform child in transform)
+        {
+            child.GetComponent<Card>().AdjustRenderLayer(1000);
+            child.gameObject.layer = LayerMask.NameToLayer("IgnoredCard");
         }
     }
 }

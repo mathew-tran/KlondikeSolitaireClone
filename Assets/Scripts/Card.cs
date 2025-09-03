@@ -1,6 +1,8 @@
+using NUnit.Framework;
 using NUnit.Framework.Internal;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Card : MonoBehaviour
@@ -48,6 +50,8 @@ public class Card : MonoBehaviour
     public CARD_COLOR CardColor;
 
     public Vector3 LastPosition;
+
+    public GameObject Highlight;
     public float GetSpeed(MOVE_SPEED speedType)
     {
         switch(speedType)
@@ -96,12 +100,14 @@ public class Card : MonoBehaviour
     public void AdjustRenderLayer(int amount)
     {
         GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
+        Highlight.GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
     }
 
     public CardPile GetCardPile()
     {
         return transform.parent.GetComponent<CardPile>();
     }
+
 
 
     public void SetTargetability(bool bIsTargetable)
@@ -331,6 +337,15 @@ public class Card : MonoBehaviour
 
     }
 
+    public bool IsTopCard()
+    {
+        CardPile pile = GetCardPile();
+        if (pile == null)
+        {
+            return false;
+        }
+        return pile.GetTopCard() == this;
+    }
     public bool IsMoving()
     {
         return MoveState == MOVE_STATE.IN_MOTION;
@@ -342,5 +357,12 @@ public class Card : MonoBehaviour
         CardSuit = suit;
         SetCardImage();
         gameObject.name = GetCardName();
+        ShowHighlight(false);
+    }
+
+    public void ShowHighlight(bool bShowHighlight)
+    {
+        Highlight.SetActive(bShowHighlight);
+
     }
 }
