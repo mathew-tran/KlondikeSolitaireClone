@@ -15,7 +15,9 @@ public class CardPile : MonoBehaviour
     {
         card.gameObject.transform.SetParent(transform);
         StartCoroutine(card.DoMove(GetComponent<CardPile>().GetLatestPosition(), Card.MOVE_SPEED.SUPERFAST));
-        card.gameObject.GetComponent<Renderer>().material.renderQueue = 3000 + transform.childCount;
+        card.RenderQueueLayer = 3000 + transform.childCount;
+        card.gameObject.GetComponent<Renderer>().material.renderQueue = card.RenderQueueLayer;
+        
         yield return new WaitUntil(() => card.IsMoving() == false);
     }
     public Vector3 GetLatestPosition()
@@ -26,7 +28,7 @@ public class CardPile : MonoBehaviour
                 Vector3 offsetAmount = new Vector3(.001f, .01f, 0);
                 return ((transform.childCount - 1) * offsetAmount) + transform.position;
             case PILE_TYPE.HOLDER:
-                Vector3 holderOffsetAmount = new Vector3(0f, .1f, -.45f);
+                Vector3 holderOffsetAmount = new Vector3(0f, .2f, -.55f);
                 return ((transform.childCount - 1) * holderOffsetAmount) + transform.position;
             case PILE_TYPE.FOUNDATION:
                 return transform.position;

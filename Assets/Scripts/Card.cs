@@ -55,8 +55,6 @@ public class Card : MonoBehaviour
         }
         return .01f;
     }
-    [SerializeField]
-    private bool bIsMoving = false;
 
     public enum FLIP_STATE
     {
@@ -65,9 +63,29 @@ public class Card : MonoBehaviour
         FLIPPED
     }
 
+    public enum MOVE_STATE
+    {
+        IN_PLACE,
+        IN_MOTION
+    }
+
+    [SerializeField]
+    public MOVE_STATE MoveState;
+
     [SerializeField]
     private FLIP_STATE FlipState = FLIP_STATE.NOT_FLIPPED;
 
+    public int RenderQueueLayer = 0;
+
+    public void AdjustRenderLayer(int amount)
+    {
+        GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
+    }
+
+    public bool CanDrag()
+    {
+        return FlipState == FLIP_STATE.FLIPPED;
+    }
     private void SetCardImage()
     {
         string cardName = "Cards/";
@@ -81,7 +99,8 @@ public class Card : MonoBehaviour
         {
             cardName += "black";
         }
-        Texture2D image = Resources.Load<Texture2D>(cardName);
+
+        Texture2D image = Resources.Load<Texture2D>(cardName); // test test
 
         if (image)
         {
@@ -163,13 +182,13 @@ public class Card : MonoBehaviour
 
     public IEnumerator DoMove(Vector3 target, MOVE_SPEED speedType)
     {
-        if (bIsMoving)
+        if (IsMoving())
         {
             Debug.LogError("Attempted to move card: " + gameObject.name + ", but it was already moving");
         }
         else
         {
-            bIsMoving = true;
+            MoveState = MOVE_STATE.IN_MOTION;
 
 
             float progress = 0.0f;
@@ -183,7 +202,7 @@ public class Card : MonoBehaviour
                 yield return null;
             }
 
-            bIsMoving = false;
+            MoveState = MOVE_STATE.IN_PLACE;
         }
 
     }
@@ -222,7 +241,7 @@ public class Card : MonoBehaviour
 
     public bool IsMoving()
     {
-        return bIsMoving;
+        return MoveState == MOVE_STATE.IN_MOTION;
     }
 
     public void Setup(RANK rank, SUIT suit)
@@ -231,5 +250,10 @@ public class Card : MonoBehaviour
         CardSuit = suit;
         SetCardImage();
         gameObject.name = GetCardName();
+    }
+
+    private void OnMouseEnter()
+    {
+        Debug.Log("Card Hovered: " + gameObject.name);
     }
 }

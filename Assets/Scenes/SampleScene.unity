@@ -193,8 +193,8 @@ Camera:
   m_GameObject: {fileID: 330585543}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -202,7 +202,7 @@ Camera:
   m_ShutterSpeed: 0.005
   m_Aperture: 16
   m_FocusDistance: 10
-  m_FocalLength: 50
+  m_FocalLength: 5.8527913
   m_BladeCount: 5
   m_Curvature: {x: 2, y: 11}
   m_BarrelClipping: 0.25
@@ -384,7 +384,7 @@ Light:
   serializedVersion: 11
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 0.8
+  m_Intensity: 1.32
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -396,7 +396,7 @@ Light:
     m_Strength: 0.053
     m_Bias: 0.05
     m_NormalBias: 0.4
-    m_NearPlane: 0.2
+    m_NearPlane: 0.1
     m_CullingMatrixOverride:
       e00: 1
       e01: 0
@@ -874,6 +874,57 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 621228708288500561, guid: 39c9a75b727295d4994bff93326ace71, type: 3}
   m_PrefabInstance: {fileID: 403191425}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1284650965
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1284650967}
+  - component: {fileID: 1284650966}
+  m_Layer: 0
+  m_Name: Player
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1284650966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284650965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63e8f89b03c1b1b48af301aede7748f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Player
+  HitLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  BoardMask:
+    serializedVersion: 2
+    m_Bits: 64
+  CardFocused: {fileID: 0}
+--- !u!4 &1284650967
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284650965}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.71814, y: -0.06, z: -2.29759}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1387730194 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 621228708288500561, guid: 39c9a75b727295d4994bff93326ace71, type: 3}
@@ -891,8 +942,8 @@ GameObject:
   - component: {fileID: 1400927491}
   - component: {fileID: 1400927490}
   - component: {fileID: 1400927489}
-  m_Layer: 0
-  m_Name: Cube
+  m_Layer: 6
+  m_Name: Board
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1376,3 +1427,4 @@ SceneRoots:
   - {fileID: 964004668}
   - {fileID: 13955830}
   - {fileID: 1749311897}
+  - {fileID: 1284650967}
