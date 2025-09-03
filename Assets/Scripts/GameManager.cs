@@ -2,6 +2,7 @@ using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,6 +17,13 @@ public class GameManager : MonoBehaviour
         DeckReference.OnDeckSetupComplete += OnDeckSetupComplete;
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyUp(KeyCode.R)) 
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
     private void OnDeckSetupComplete()
     {
         StartCoroutine(FillSlots());
@@ -43,7 +51,7 @@ public class GameManager : MonoBehaviour
 
         foreach(CardPile pile in allSlots)
         {
-            yield return StartCoroutine(pile.FlipExposedCard());
+            yield return StartCoroutine(pile.AttemptFlipExposedCard());
         }
     }
        

@@ -18,7 +18,7 @@ public class CardPile : MonoBehaviour
         StartCoroutine(card.DoMove(GetComponent<CardPile>().GetLatestPosition(), moveSpeed));
         card.RenderQueueLayer = 3000 + transform.childCount;
         card.gameObject.GetComponent<Renderer>().material.renderQueue = card.RenderQueueLayer;
-        
+        card.LastPosition = card.GetCardPile().GetLatestPosition();
         yield return new WaitUntil(() => card.IsMoving() == false);
     }
 
@@ -52,6 +52,7 @@ public class CardPile : MonoBehaviour
        
     }
 
+
     public Card GetTopCard()
     {
         if (transform.childCount <= 0)
@@ -61,8 +62,16 @@ public class CardPile : MonoBehaviour
         }
         return transform.GetChild(transform.childCount - 1).GetComponent<Card>();
     }
-    public IEnumerator FlipExposedCard()
+    public IEnumerator AttemptFlipExposedCard()
     {
-        yield return StartCoroutine(GetTopCard().DoFlip(Card.MOVE_SPEED.FAST));
+        Debug.Log("Attempt to flip exposed card" + gameObject.name);
+        if (transform.childCount == 0)
+        {
+            yield return null;
+        }
+        else if (GetTopCard().CanFlip()) {
+            yield return StartCoroutine(GetTopCard().DoFlip(Card.MOVE_SPEED.FAST));
+        }
+        
     }
 }

@@ -1,4 +1,6 @@
+using Mono.Cecil.Cil;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class Player : MonoBehaviour
 {
@@ -17,30 +19,63 @@ public class Player : MonoBehaviour
             
             if (card != null)
             {
-                if (Input.GetMouseButtonDown(0))
+                if (CardFocused == null)
                 {
-                    if (card.CanDrag())
+                    if (Input.GetMouseButtonDown(0))
                     {
-                        CardFocused = card;
+                        if (card.CanDrag())
+                        {
+                            CardFocused = card;
+                            CardFocused.SetTargetability(false);
+                            Debug.Log(obj.name);
 
-                    }                    
-
+                        }
+                    }
                 }
-                Debug.Log(obj.name);
+                else
+                {
+                    Debug.Log("Attempt drag" + obj.name);
+                    if (Input.GetMouseButton(0) == false)
+                    {
+                        if (card.CanDrag())
+                        {
+                            if (card.GetCardPile().CanTakeCard(CardFocused))
+                            {
+                                var oldCardPile = CardFocused.GetCardPile();
+                                StartCoroutine(card.GetCardPile().TakeCard(CardFocused));
+                                StartCoroutine(oldCardPile.AttemptFlipExposedCard());
+                                ReleaseCard();
+                                Debug.Log("attempt card take");
+                            }
+                            
+
+                        }
+                    }
+                   
+                        
+                }
+                
+               
             }
         }
         if (Input.GetMouseButtonUp(0))
         {
             if (CardFocused != null)
             {
-                CardFocused.AdjustRenderLayer(0);
-                StartCoroutine(CardFocused.GetCardPile().TakeCard(CardFocused));
+                StartCoroutine(CardFocused.RevertToLastPosition());
+                ReleaseCard();
             }
-            CardFocused = null;
         }
 
         AttemptDragCard();
         
+    }
+
+    private void ReleaseCard()
+    {
+        CardFocused.SetTargetability(true);
+        CardFocused.AdjustRenderLayer(0);
+        CardFocused = null;
     }
 
     public void AttemptDragCard()

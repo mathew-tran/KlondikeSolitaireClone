@@ -46,8 +46,8 @@ public class Card : MonoBehaviour
     public SUIT CardSuit;
     public RANK CardRank;
     public CARD_COLOR CardColor;
-   
 
+    public Vector3 LastPosition;
     public float GetSpeed(MOVE_SPEED speedType)
     {
         switch(speedType)
@@ -98,9 +98,21 @@ public class Card : MonoBehaviour
         return transform.parent.GetComponent<CardPile>();
     }
 
+
+    public void SetTargetability(bool bIsTargetable)
+    {
+        if (bIsTargetable)
+        {
+            gameObject.layer = LayerMask.NameToLayer("Card");
+        }
+        else
+        {
+            gameObject.layer = LayerMask.NameToLayer("IgnoredCard");
+        }
+    }
     public bool CanStackCard(Card card)
     {
-        return card.CardColor != CardColor;
+        return card.CardColor != CardColor && CardRank == card.CardRank + 1;
     }
     public bool CanDrag()
     {
@@ -202,6 +214,11 @@ public class Card : MonoBehaviour
         return cardName;
     }
 
+    public IEnumerator RevertToLastPosition()
+    {
+        yield return StartCoroutine(DoMove(LastPosition, MOVE_SPEED.INSTANT));
+    }
+
     public IEnumerator DoMove(Vector3 target, MOVE_SPEED speedType)
     {
         if (IsMoving())
@@ -229,6 +246,10 @@ public class Card : MonoBehaviour
 
     }
 
+    public bool CanFlip()
+    {
+        return FlipState == FLIP_STATE.NOT_FLIPPED;
+    }
     public IEnumerator DoFlip(MOVE_SPEED speedType)
     {
         if (FlipState != FLIP_STATE.NOT_FLIPPED)
@@ -272,10 +293,5 @@ public class Card : MonoBehaviour
         CardSuit = suit;
         SetCardImage();
         gameObject.name = GetCardName();
-    }
-
-    private void OnMouseEnter()
-    {
-        Debug.Log("Card Hovered: " + gameObject.name);
     }
 }
