@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using static Card;
 
 public class CardPile : MonoBehaviour
 {
@@ -11,14 +12,27 @@ public class CardPile : MonoBehaviour
     }
 
     public PILE_TYPE PileType;
-    public IEnumerator TakeCard(Card card)
+    public IEnumerator TakeCard(Card card, Card.MOVE_SPEED moveSpeed = Card.MOVE_SPEED.SUPERFAST)
     {
         card.gameObject.transform.SetParent(transform);
-        StartCoroutine(card.DoMove(GetComponent<CardPile>().GetLatestPosition(), Card.MOVE_SPEED.SUPERFAST));
+        StartCoroutine(card.DoMove(GetComponent<CardPile>().GetLatestPosition(), moveSpeed));
         card.RenderQueueLayer = 3000 + transform.childCount;
         card.gameObject.GetComponent<Renderer>().material.renderQueue = card.RenderQueueLayer;
         
         yield return new WaitUntil(() => card.IsMoving() == false);
+    }
+
+    public bool CanTakeCard(Card card)
+    {
+        if (GetTopCard() == null)
+        {
+            if (card.CardRank == Card.RANK.KING)
+            {
+                return true;
+            }
+            return false;
+        }
+        return GetTopCard().CanStackCard(card);
     }
     public Vector3 GetLatestPosition()
     {
@@ -49,6 +63,6 @@ public class CardPile : MonoBehaviour
     }
     public IEnumerator FlipExposedCard()
     {
-        yield return StartCoroutine(GetTopCard().DoFlip(Card.MOVE_SPEED.MEDIUM));
+        yield return StartCoroutine(GetTopCard().DoFlip(Card.MOVE_SPEED.FAST));
     }
 }

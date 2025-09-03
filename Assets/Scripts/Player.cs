@@ -4,6 +4,7 @@ public class Player : MonoBehaviour
 {
     public LayerMask HitLayerMask;
     public LayerMask BoardMask;
+    public LayerMask IgnoreCardLayer;
     public Card CardFocused;
     // Update is called once per frame
     void Update()
@@ -21,6 +22,8 @@ public class Player : MonoBehaviour
                     if (card.CanDrag())
                     {
                         CardFocused = card;
+                        CardFocused.gameObject.layer = IgnoreCardLayer.value;
+
                     }                    
 
                 }
@@ -31,8 +34,9 @@ public class Player : MonoBehaviour
         {
             if (CardFocused != null)
             {
+                CardFocused.gameObject.layer = HitLayerMask.value;
                 CardFocused.AdjustRenderLayer(0);
-                StartCoroutine(CardFocused.gameObject.transform.parent.GetComponent<CardPile>().TakeCard(CardFocused));
+                StartCoroutine(CardFocused.GetCardPile().TakeCard(CardFocused));
             }
             CardFocused = null;
         }
@@ -51,8 +55,9 @@ public class Player : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit, 100, BoardMask))
         {
+            
             CardFocused.AdjustRenderLayer(1000);
-            CardFocused.gameObject.transform.position = hit.point + new Vector3(0, 0, 1);
+            CardFocused.gameObject.transform.position = hit.point - ray.direction * 2;
         }
     }
 }

@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class Card : MonoBehaviour
 {
+    public enum MOVE_SPEED
+    {
+        SLOW,
+        MEDIUM,
+        FAST,
+        SUPERFAST,
+        INSTANT
+    }
     public enum RANK
     {
         ACE,
@@ -29,15 +37,16 @@ public class Card : MonoBehaviour
         HEARTS
     }
 
+    public enum CARD_COLOR
+    {
+        BLACK,
+        WHITE
+    }
+    
     public SUIT CardSuit;
     public RANK CardRank;
-    public enum MOVE_SPEED
-    {
-        SLOW,
-        MEDIUM,
-        FAST,
-        SUPERFAST
-    }
+    public CARD_COLOR CardColor;
+   
 
     public float GetSpeed(MOVE_SPEED speedType)
     {
@@ -51,6 +60,8 @@ public class Card : MonoBehaviour
                 return .1f;
             case MOVE_SPEED.SUPERFAST:
                 return .01f;
+            case MOVE_SPEED.INSTANT:
+                return .001f;
 
         }
         return .01f;
@@ -82,6 +93,15 @@ public class Card : MonoBehaviour
         GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
     }
 
+    public CardPile GetCardPile()
+    {
+        return transform.parent.GetComponent<CardPile>();
+    }
+
+    public bool CanStackCard(Card card)
+    {
+        return card.CardColor != CardColor;
+    }
     public bool CanDrag()
     {
         return FlipState == FLIP_STATE.FLIPPED;
@@ -94,10 +114,12 @@ public class Card : MonoBehaviour
         if (CardSuit == SUIT.DIAMOND || CardSuit == SUIT.HEARTS)
         {
             cardName += "white";
+            CardColor = CARD_COLOR.WHITE;
         }
         else
         {
             cardName += "black";
+            CardColor = CARD_COLOR.BLACK;
         }
 
         Texture2D image = Resources.Load<Texture2D>(cardName); // test test

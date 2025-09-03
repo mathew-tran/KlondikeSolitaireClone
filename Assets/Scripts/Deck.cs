@@ -2,9 +2,10 @@ using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.Linq;
+using static Card;
 
 public class Deck : MonoBehaviour
 {
@@ -18,15 +19,23 @@ public class Deck : MonoBehaviour
     public Action OnDeckSetupComplete;
     private IEnumerator SpawnDeck()
     {
-        foreach(Card.RANK rank in Enum.GetValues(typeof(Card.RANK))){
+        List<Tuple<Card.SUIT, Card.RANK >> cardData = new List<Tuple<Card.SUIT, Card.RANK>>();
+        foreach (Card.RANK rank in Enum.GetValues(typeof(Card.RANK)))
+        {
             foreach (Card.SUIT suit in Enum.GetValues(typeof(Card.SUIT)))
             {
-                GameObject instance = Instantiate(CardPrefab, SpawnPosition.position, transform.rotation, CardHolder.transform);
-                Card cardRef = instance.GetComponent<Card>();
-                cardRef.Setup(rank, suit);
-                yield return new WaitForSeconds(.01f);
-                yield return CardHolder.GetComponent<CardPile>().TakeCard(cardRef);
+                cardData.Add(new Tuple<Card.SUIT, Card.RANK>(suit, rank));
             }
+        }
+        cardData = cardData.OrderBy(_ => UnityEngine.Random.value).ToList();
+        
+            
+        foreach(Tuple<Card.SUIT, Card.RANK> tuple in cardData)
+        {
+            GameObject instance = Instantiate(CardPrefab, SpawnPosition.position, transform.rotation, CardHolder.transform);
+            Card cardRef = instance.GetComponent<Card>();
+            cardRef.Setup(tuple.Item2, tuple.Item1);
+            yield return CardHolder.GetComponent<CardPile>().TakeCard(cardRef);
         }
     }
 
@@ -46,13 +55,14 @@ public class Deck : MonoBehaviour
         List<Transform> shuffledCards = cards.OrderBy(_ => UnityEngine.Random.value).ToList();
         cards.Reverse();
 
-        foreach(Transform card in cards)
+        foreach(Transform card in shuffledCards)
         {
             Card cardRef = card.gameObject.GetComponent<Card>();            
             card.SetParent(null);
-            StartCoroutine(cardRef.DoMove(SpawnPosition.position, Card.MOVE_SPEED.SUPERFAST));
-            yield return new WaitUntil(() => cardRef.IsMoving() == false);
+            yield return StartCoroutine(cardRef.DoMove(SpawnPosition.position, Card.MOVE_SPEED.INSTANT));
+            
         }
+        
 
         foreach (Transform card in shuffledCards)
         {            
@@ -70,7 +80,6 @@ public class Deck : MonoBehaviour
     private IEnumerator SetupDeck()
     {
         yield return StartCoroutine(SpawnDeck());
-        yield return StartCoroutine(ShuffleDeck());
         OnDeckSetupComplete.Invoke();
     }
 
