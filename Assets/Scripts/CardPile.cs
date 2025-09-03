@@ -26,17 +26,18 @@ public class CardPile : MonoBehaviour
 
     public IEnumerator TakeCardAndFlip(bool bFlipped, Card card, Card.MOVE_SPEED moveSpeed = Card.MOVE_SPEED.SUPERFAST)
     {
+        yield return StartCoroutine(TakeCard(card, moveSpeed));
         if (bFlipped)
         {
-            yield return StartCoroutine(card.DoFlip(MOVE_SPEED.SUPERFAST));
+            yield return StartCoroutine(card.DoFlip(MOVE_SPEED.FAST));
             
         }
         else
         {
-            yield return StartCoroutine(card.DoUnFlip(MOVE_SPEED.SUPERFAST));
+            yield return StartCoroutine(card.DoUnFlip(MOVE_SPEED.FAST));
         }
 
-        yield return StartCoroutine(TakeCard(card, moveSpeed));
+       
     }
 
     public bool CanTakeCard(Card card)
@@ -73,7 +74,7 @@ public class CardPile : MonoBehaviour
         switch(PileType)
         {
             case PILE_TYPE.DECK:
-                Vector3 offsetAmount = new Vector3(.01f, .01f, .01f);
+                Vector3 offsetAmount = new Vector3(0f, .01f, .01f);
                 return ((transform.childCount - 1) * offsetAmount) + transform.position + offset;
             case PILE_TYPE.HOLDER:
                 Vector3 holderOffsetAmount = new Vector3(0f, .2f, -.55f);
@@ -81,7 +82,8 @@ public class CardPile : MonoBehaviour
             case PILE_TYPE.FOUNDATION:
                 return transform.position + offset;
             case PILE_TYPE.HAND:
-                return transform.position + offset;
+                Vector3 handOffset = new Vector3(0f, .01f, .0f);
+                return ((transform.childCount - 1) * handOffset) + transform.position + offset;
 
         }
         return transform.position + offset;

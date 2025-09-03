@@ -66,7 +66,7 @@ public class Deck : MonoBehaviour
             Card TopCard = GetTopCard();
             if (TopCard)
             {
-                StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard));
+                StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.INSTANT));
 
             }
             else
