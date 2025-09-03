@@ -22,7 +22,6 @@ public class Player : MonoBehaviour
                     if (card.CanDrag())
                     {
                         CardFocused = card;
-                        CardFocused.gameObject.layer = IgnoreCardLayer.value;
 
                     }                    
 
@@ -34,7 +33,6 @@ public class Player : MonoBehaviour
         {
             if (CardFocused != null)
             {
-                CardFocused.gameObject.layer = HitLayerMask.value;
                 CardFocused.AdjustRenderLayer(0);
                 StartCoroutine(CardFocused.GetCardPile().TakeCard(CardFocused));
             }
