@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
 
     public Player PlayerReference;
 
+    public PauseMenu PauseMenuReference;
+
     public enum GAME_STATE
     {
         IN_GAME,
@@ -27,18 +29,21 @@ public class GameManager : MonoBehaviour
 
     public Action OnGameOver;
 
+    public void Restart()
+    {
+        Time.timeScale = 1.0f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
     private void Awake()
     {
         DeckReference.OnDeckSetupComplete += OnDeckSetupComplete;
 
         OnGameOver += DoGameOver;
+        OnGameOver += PauseMenuReference.OnWin;
         CardPiles = GameObject.FindObjectsByType(typeof(CardPile), FindObjectsSortMode.None) as CardPile[];
         foreach (CardPile pile in CardPiles)
         {
-            if (pile.PileType != CardPile.PILE_TYPE.FOUNDATION)
-            {
-                pile.OnCardPlaced += CheckGameOver;
-            }
+            pile.OnCardPlaced += CheckGameOver;
         }
     }
 
@@ -46,13 +51,10 @@ public class GameManager : MonoBehaviour
     {
         DeckReference.OnDeckSetupComplete -= OnDeckSetupComplete;
         OnGameOver -= DoGameOver;
-
+        OnGameOver -= PauseMenuReference.OnWin;
         foreach (CardPile pile in CardPiles)
         {
-            if (pile.PileType != CardPile.PILE_TYPE.FOUNDATION)
-            {
-                pile.OnCardPlaced -= CheckGameOver;
-            }
+            pile.OnCardPlaced -= CheckGameOver;    
         }
     }
 
@@ -90,9 +92,9 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyUp(KeyCode.R)) 
+        if (Input.GetKeyUp(KeyCode.Escape) || Input.GetKeyUp(KeyCode.P))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            PauseMenuReference.Toggle();
         }
     }
     private void OnDeckSetupComplete()
