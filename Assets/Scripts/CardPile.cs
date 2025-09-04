@@ -35,7 +35,11 @@ public class CardPile : MonoBehaviour
     public List<Card> GetCardAndSiblings(Card card)
     {
         List<Card> pile = new List<Card>();
-        if (PileType == PILE_TYPE.HOLDER)
+        if (PileType == PILE_TYPE.FOUNDATION)
+        {
+            pile.Add(GetTopCard());
+        }
+        else if (PileType == PILE_TYPE.HOLDER)
         {
             for (int i = card.transform.GetSiblingIndex(); i < transform.childCount; ++i)
             {
@@ -105,6 +109,7 @@ public class CardPile : MonoBehaviour
         var offset = new Vector3(0, .05f, 0f);
         switch(PileType)
         {
+            case PILE_TYPE.FOUNDATION:
             case PILE_TYPE.DECK:
                 Vector3 offsetAmount = new Vector3(0f, .01f, .01f);
                 return ((transform.childCount - 1) * offsetAmount) + transform.position + offset;
@@ -112,8 +117,7 @@ public class CardPile : MonoBehaviour
             case PILE_TYPE.PLAYER:
                 Vector3 holderOffsetAmount = new Vector3(0f, .2f, -.55f);
                 return ((transform.childCount - 1) * holderOffsetAmount) + transform.position + offset;
-            case PILE_TYPE.FOUNDATION:
-                return transform.position + offset;
+           
             case PILE_TYPE.HAND:
                 Vector3 handOffset = new Vector3(0f, .01f, .0f);
                 return ((transform.childCount - 1) * handOffset) + transform.position + offset;
