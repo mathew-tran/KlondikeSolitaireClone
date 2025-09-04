@@ -25,6 +25,10 @@ public class Player : MonoBehaviour
         {
             return false;
         }
+        if (GetComponent<CardPile>().HasCards())
+        {
+            return false;
+        }
         if (Input.GetMouseButtonDown(0))
         {
             StartCoroutine(deck.DeckClicked());
@@ -69,22 +73,25 @@ public class Player : MonoBehaviour
         }
         else
         {
-            Debug.Log("Attempt drag" + obj.name);
             if (Input.GetMouseButton(0) == false)
             {
                 if (card.CanDrag())
                 {
-                    if (card.GetCardPile().CanTakeCard(GetComponent<CardPile>().GetBottomCard()))
+                    
+                    while(GetComponent<CardPile>().GetBottomCard())
                     {
-                        while(GetComponent<CardPile>().GetBottomCard())
+                        if (card.GetCardPile().CanTakeCard(GetComponent<CardPile>().GetBottomCard()))
                         {
                             StartCoroutine(card.GetCardPile().TakeCard(GetComponent<CardPile>().GetBottomCard()));
                         }
-                        
-                        StartCoroutine(LastPile.AttemptFlipExposedCard());
-                        return true;
+                        else
+                        {
+                            return false;
+                        }                               
                     }
-
+                        
+                    StartCoroutine(LastPile.AttemptFlipExposedCard());
+                    return true;
 
                 }
             }
@@ -106,16 +113,23 @@ public class Player : MonoBehaviour
         {
             if (Input.GetMouseButton(0) == false)
             {
-                if (cardPile.CanTakeCard(GetComponent<CardPile>().GetBottomCard()))
+               
+                
+                while (GetComponent<CardPile>().GetBottomCard())
                 {
-                    while (GetComponent<CardPile>().GetBottomCard())
-                    {
+                    if (cardPile.CanTakeCard(GetComponent<CardPile>().GetBottomCard())) { 
                         StartCoroutine(cardPile.TakeCard(GetComponent<CardPile>().GetBottomCard()));
                     }
+                    else
+                    {
+                        return false;
+                    }
 
-                    StartCoroutine(LastPile.AttemptFlipExposedCard());
-                    return true;
                 }
+
+                StartCoroutine(LastPile.AttemptFlipExposedCard());
+                return true;
+                
             }
         }
         return false;

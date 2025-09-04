@@ -52,6 +52,7 @@ public class Card : MonoBehaviour
     public Vector3 LastPosition;
 
     public GameObject Highlight;
+    public GameObject Outline;
     public float GetSpeed(MOVE_SPEED speedType)
     {
         switch(speedType)
@@ -101,6 +102,7 @@ public class Card : MonoBehaviour
     {
         GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
         Highlight.GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
+        Outline.GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
     }
 
     public CardPile GetCardPile()
@@ -256,6 +258,8 @@ public class Card : MonoBehaviour
             float progress = 0.0f;
             float timeToMove = GetSpeed(speedType);
             Vector3 startPosition = transform.position;
+
+            SFXManager.GetInstance().PlayDragSFX(transform.position);
             while (timeToMove > progress)
             {
                 progress += Time.deltaTime;
@@ -263,6 +267,8 @@ public class Card : MonoBehaviour
                 transform.position = Vector3.Lerp(startPosition, target, weight);
                 yield return null;
             }
+
+            SFXManager.GetInstance().PlayCardPlaceSFX(transform.position);
 
             MoveState = MOVE_STATE.IN_PLACE;
         }
@@ -281,15 +287,17 @@ public class Card : MonoBehaviour
         }
         else
         {
+            
             FlipState = FLIP_STATE.FLIPPING;
             yield return StartCoroutine(DoMove(transform.position + new Vector3(0, .5f, 0), MOVE_SPEED.MEDIUM));
-            yield return new WaitForSeconds(.1f);
 
 
             float progress = 0.0f;
             float timeToMove = GetSpeed(speedType);
             Quaternion startRotation = transform.rotation;
             Quaternion targetRotation = startRotation * Quaternion.Euler(180, 0, 0);
+
+            SFXManager.GetInstance().PlayFlipCardSFX(transform.position);
             while (timeToMove > progress)
             {
                 progress += Time.deltaTime;
@@ -313,15 +321,16 @@ public class Card : MonoBehaviour
         }
         else
         {
+            
             FlipState = FLIP_STATE.FLIPPING;
-            yield return StartCoroutine(DoMove(transform.position + new Vector3(0, .5f, 0), MOVE_SPEED.MEDIUM));
-            yield return new WaitForSeconds(.1f);
+            yield return StartCoroutine(DoMove(transform.position + new Vector3(0, .5f, 0), MOVE_SPEED.INSTANT));
 
 
             float progress = 0.0f;
             float timeToMove = GetSpeed(speedType);
             Quaternion startRotation = transform.rotation;
             Quaternion targetRotation = startRotation * Quaternion.Euler(180, 0, 0);
+            SFXManager.GetInstance().PlayFlipCardSFX(transform.position);
             while (timeToMove > progress)
             {
                 progress += Time.deltaTime;
@@ -331,7 +340,7 @@ public class Card : MonoBehaviour
             }
 
             FlipState = FLIP_STATE.NOT_FLIPPED;
-            yield return StartCoroutine(DoMove(transform.position - new Vector3(0, .5f, 0), MOVE_SPEED.SUPERFAST));
+            yield return StartCoroutine(DoMove(transform.position - new Vector3(0, .5f, 0), MOVE_SPEED.INSTANT));
 
         }
 

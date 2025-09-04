@@ -80,7 +80,7 @@ public class Deck : MonoBehaviour
             Card TopCard = GetTopCard();
             if (TopCard)
             {
-                yield return StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.MEDIUM));
+                yield return StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.FAST));
 
             }
             else
@@ -90,10 +90,18 @@ public class Deck : MonoBehaviour
                 {
                     cards.Add(child);
                 }
-
                 foreach (Transform child in cards)
                 {
-                    StartCoroutine(CardHolder.TakeCardAndFlip(false, child.GetComponent<Card>(), MOVE_SPEED.MEDIUM));
+                    yield return StartCoroutine(child.GetComponent<Card>().DoUnFlip(MOVE_SPEED.INSTANT));
+                }
+
+                 
+
+                List<Transform> shuffledCards = cards.OrderBy(_ => UnityEngine.Random.value).ToList();
+
+                foreach (Transform child in shuffledCards)
+                {
+                    yield return StartCoroutine(CardHolder.TakeCard(child.GetComponent<Card>(), MOVE_SPEED.SUPERFAST));
                 }
                 yield return new WaitForSeconds(.2f);
             }
@@ -104,36 +112,6 @@ public class Deck : MonoBehaviour
     public Card GetTopCard()
     {
         return CardHolder.GetTopCard();
-    }
-    private IEnumerator ShuffleDeck()
-    {
-        yield return null;
-        List<Transform> cards = new List<Transform>();
-        foreach(Transform child in CardHolder.transform)
-        {
-            cards.Add(child);
-        }
-
-        List<Transform> shuffledCards = cards.OrderBy(_ => UnityEngine.Random.value).ToList();
-        cards.Reverse();
-
-        foreach(Transform card in shuffledCards)
-        {
-            Card cardRef = card.gameObject.GetComponent<Card>();            
-            card.SetParent(null);
-            yield return StartCoroutine(cardRef.DoMove(SpawnPosition.position, Card.MOVE_SPEED.INSTANT));
-            
-        }
-        
-
-        foreach (Transform card in shuffledCards)
-        {            
-            Card cardRef = card.gameObject.GetComponent<Card>();
-            yield return CardHolder.TakeCard(cardRef);
-        }
-
-
-
     }
     void Start()
     {

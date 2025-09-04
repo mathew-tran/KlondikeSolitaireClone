@@ -35,29 +35,41 @@ public class CardPile : MonoBehaviour
     public List<Card> GetCardAndSiblings(Card card)
     {
         List<Card> pile = new List<Card>();
-
-        for (int i =  card.transform.GetSiblingIndex(); i < transform.childCount; ++i)
+        if (PileType == PILE_TYPE.HOLDER)
         {
-            pile.Add(transform.GetChild(i).GetComponent<Card>());
+            for (int i = card.transform.GetSiblingIndex(); i < transform.childCount; ++i)
+            {
+                pile.Add(transform.GetChild(i).GetComponent<Card>());
+            }
+
         }
+        else
+        {
+            pile.Add(card);
+        }
+
 
         return pile;
     }
 
     public IEnumerator TakeCardAndFlip(bool bFlipped, Card card, Card.MOVE_SPEED moveSpeed = Card.MOVE_SPEED.SUPERFAST)
     {
+
+
         yield return StartCoroutine(TakeCard(card, moveSpeed));
+
         if (bFlipped)
         {
-            yield return StartCoroutine(card.DoFlip(MOVE_SPEED.SUPERFAST));
-            
+            yield return StartCoroutine(card.DoFlip(moveSpeed));
+
         }
         else
         {
-            yield return StartCoroutine(card.DoUnFlip(MOVE_SPEED.SUPERFAST));
+            yield return StartCoroutine(card.DoUnFlip(moveSpeed));
         }
 
-       
+
+
     }
 
     public bool CanTakeCard(Card card)
@@ -133,7 +145,7 @@ public class CardPile : MonoBehaviour
     }
     public IEnumerator AttemptFlipExposedCard()
     {
-        Debug.Log("Attempt to flip exposed card" + gameObject.name);
+        //Debug.Log("Attempt to flip exposed card" + gameObject.name);
         if (transform.childCount == 0)
         {
             yield return null;
