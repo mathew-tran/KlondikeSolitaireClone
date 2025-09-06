@@ -19,23 +19,44 @@ public class GameManager : MonoBehaviour
 
     public PauseMenu PauseMenuReference;
 
+
+    private int Seed;
+
+
+    public int GetSeed()
+    {
+        return Seed;
+    }
+
+    public void SetSeed(int newSeed)
+    {
+        Seed = newSeed;
+    }
+
     public enum GAME_STATE
     {
         IN_GAME,
         WIN
     }
 
+    public enum SEED_TYPE
+    {
+        REUSE,
+        NEW
+    }
+
     public GAME_STATE CurrentState = GAME_STATE.IN_GAME;
 
     public Action OnGameOver;
 
-    public void Restart()
+    private static GameManager Instance;
+    public static GameManager GetInstance()
     {
-        Time.timeScale = 1.0f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        return Instance;
     }
     private void Awake()
     {
+        Instance = this;
         DeckReference.OnDeckSetupComplete += OnDeckSetupComplete;
 
         OnGameOver += DoGameOver;
@@ -45,6 +66,51 @@ public class GameManager : MonoBehaviour
         {
             pile.OnCardPlaced += CheckGameOver;
         }
+
+        var newSeed = PlayerPrefs.GetInt("Seed", -1);
+        if (newSeed == -1)
+        {
+            Seed = (int)DateTime.Now.Ticks;
+        }
+        else
+        {
+            Seed = newSeed;
+        }
+
+
+        UnityEngine.Random.InitState(Seed);
+    }
+
+
+
+    public void Restart(SEED_TYPE seed = SEED_TYPE.NEW)
+    {
+
+        Time.timeScale = 1.0f;
+        if (seed == SEED_TYPE.NEW)
+        {
+            PlayerPrefs.SetInt("Seed", -1);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("Seed", Seed);
+        }
+
+        PlayerPrefs.Save();
+
+         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        
+    }
+
+    public void RestartWithNewSeed()
+    {
+        Restart(SEED_TYPE.NEW);
+    }
+
+    public void RestartWithExistingSeed()
+    {
+        Restart(SEED_TYPE.REUSE);
     }
 
     private void OnDestroy()
@@ -65,6 +131,10 @@ public class GameManager : MonoBehaviour
 
     public void CheckForPlayerHints()
     {
+        if (Settings.GetInstance().GetShowHints() == false)
+        {
+            return;
+        }
         CardPile cardPile = PlayerReference.GetPlayerCardPile();
         Card card = null;
         if (cardPile.HasCards())
@@ -106,6 +176,8 @@ public class GameManager : MonoBehaviour
             }
         }
         CurrentState = GameManager.GAME_STATE.WIN;
+        PlayerPrefs.SetInt("GamesWon", PlayerPrefs.GetInt("GamesWon", 0) + 1);
+        PlayerPrefs.Save();
         Debug.Log("Game Over");
         OnGameOver?.Invoke();
     }
@@ -119,9 +191,13 @@ public class GameManager : MonoBehaviour
         }
         if (PauseMenuReference.gameObject.activeSelf)
         {
-            if (Input.GetKeyUp(KeyCode.R))
+            if (Input.GetKeyUp(KeyCode.R) && CurrentState != GAME_STATE.WIN)
             {
-                Restart();
+                RestartWithExistingSeed();
+            }
+            if (Input.GetKeyUp(KeyCode.N))
+            {
+                RestartWithNewSeed();
             }
         }
     }

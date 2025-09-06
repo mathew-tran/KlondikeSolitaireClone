@@ -40,9 +40,18 @@ public class CardPile : MonoBehaviour
         card.gameObject.layer = LayerMask.NameToLayer("Card");
         yield return new WaitUntil(() => card.IsMoving() == false);
         OnCardPlaced?.Invoke();
+        RemoveHints();
+
+
+
+
+
+    }
+
+    public void RemoveHints()
+    {
         if (CanShowHints())
         {
-            Debug.Log(GetName());
             for (int i = 0; i < HeldCards.childCount; ++i)
             {
                 HeldCards.GetChild(i).GetComponent<Card>().ShowHint(false);
@@ -53,10 +62,6 @@ public class CardPile : MonoBehaviour
                 Hint.gameObject.SetActive(false);
             }
         }
-        
-
-
-
     }
 
     public List<Card> GetCardAndSiblings(Card card)

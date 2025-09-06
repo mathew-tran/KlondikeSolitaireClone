@@ -44,10 +44,7 @@ public class Deck : MonoBehaviour
         }
         else
         {
-            int seed = (int)DateTime.Now.Ticks;
-            Debug.Log("Start Game with Seed: " + seed);
 
-            UnityEngine.Random.InitState(seed);
 
             DeckState = DECK_STATE.NON_INITIALIZED;
             List<Tuple<Card.SUIT, Card.RANK>> cardData = new List<Tuple<Card.SUIT, Card.RANK>>();
@@ -74,10 +71,14 @@ public class Deck : MonoBehaviour
 
     public void DeckClickIfEmpty()
     {
-        if (HandPile.HeldCards.transform.childCount == 0)
+        if (Settings.GetInstance().GetAutoDraw())
         {
-            StartCoroutine(DeckClicked());
+            if (HandPile.HeldCards.transform.childCount == 0)
+            {
+                StartCoroutine(DeckClicked());
+            }
         }
+        
     }
     public IEnumerator DeckClicked()
     {
@@ -110,10 +111,14 @@ public class Deck : MonoBehaviour
                     yield return StartCoroutine(CardHolder.TakeCard(child.GetComponent<Card>(), MOVE_SPEED.SUPERFAST));
                 }
                 yield return new WaitForSeconds(.2f);
-                TopCard = GetTopCard();
-                if (TopCard)
-                {
-                    yield return StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.FAST));
+
+                if (Settings.GetInstance().GetAutoDraw())
+                {        
+                    TopCard = GetTopCard();
+                    if (TopCard)
+                    {
+                        yield return StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.FAST));
+                    }
                 }
             }
             DeckState = DECK_STATE.INITIALIZED;

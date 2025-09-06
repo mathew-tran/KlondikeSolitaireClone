@@ -5,9 +5,10 @@ using UnityEngine.UI;
 public class PauseMenu : MonoBehaviour
 {
     public TMP_Text Text;
-    public Button ResumeButtonReference;
+    public Button RetryButtonReference;
 
     public bool bIsComplete = false;
+
 
     public void OnWin()
     {
@@ -18,6 +19,7 @@ public class PauseMenu : MonoBehaviour
 
 
     }
+
     public void Toggle()
     {
         if (bIsComplete)
@@ -39,7 +41,7 @@ public class PauseMenu : MonoBehaviour
     private void SetupWinScreen()
     {
         Text.text = "YOU WIN";
-        ResumeButtonReference.gameObject.SetActive(false);
+        RetryButtonReference.gameObject.SetActive(false);
 
     }
 }
