@@ -20,30 +20,62 @@ public class CardPile : MonoBehaviour
     public PILE_TYPE PileType;
 
     public Action OnCardPlaced;
+
+    public GameObject Hint;
+    public Transform HeldCards;
+
+    public string GetName()
+    {
+        return transform.parent.name  + "->" + name + PileType.ToString();
+    }
     public IEnumerator TakeCard(Card card, Card.MOVE_SPEED moveSpeed = Card.MOVE_SPEED.SUPERFAST)
     {
-        card.gameObject.transform.SetParent(transform);
-        StartCoroutine(card.DoMove(GetComponent<CardPile>().GetLatestPosition(), moveSpeed));
-        card.RenderQueueLayer = 3000 + transform.childCount;
+        
+        card.gameObject.transform.SetParent(HeldCards);
+        card.CardPileRef = this;
+        StartCoroutine(card.DoMove(GetLatestPosition(), moveSpeed));
+        card.RenderQueueLayer = 3000 + HeldCards.childCount;
         card.AdjustRenderLayer(0);
         card.LastPosition = card.GetCardPile().GetLatestPosition();
         card.gameObject.layer = LayerMask.NameToLayer("Card");
         yield return new WaitUntil(() => card.IsMoving() == false);
         OnCardPlaced?.Invoke();
+        if (CanShowHints())
+        {
+            Debug.Log(GetName());
+            for (int i = 0; i < HeldCards.childCount; ++i)
+            {
+                HeldCards.GetChild(i).GetComponent<Card>().ShowHint(false);
+            }
+
+            if (Hint != null)
+            {
+                Hint.gameObject.SetActive(false);
+            }
+        }
+        
+
+
+
     }
 
     public List<Card> GetCardAndSiblings(Card card)
     {
         List<Card> pile = new List<Card>();
+
+        if (card == null)
+        {
+            return pile;
+        }
         if (PileType == PILE_TYPE.FOUNDATION)
         {
             pile.Add(GetTopCard());
         }
         else if (PileType == PILE_TYPE.HOLDER)
         {
-            for (int i = card.transform.GetSiblingIndex(); i < transform.childCount; ++i)
+            for (int i = card.transform.GetSiblingIndex(); i < HeldCards.childCount; ++i)
             {
-                pile.Add(transform.GetChild(i).GetComponent<Card>());
+                pile.Add(HeldCards.GetChild(i).GetComponent<Card>());
             }
 
         }
@@ -76,6 +108,39 @@ public class CardPile : MonoBehaviour
 
     }
 
+    public bool CanShowHints()
+    {
+        return PileType == PILE_TYPE.HOLDER || PileType == PILE_TYPE.FOUNDATION;
+    }
+    public void AttemptToShowHint(Card card)
+    {
+        if (CanShowHints() == false)
+        {
+            return;
+        }
+        if (card == null)
+        {
+            if (GetTopCard() == null)
+            {
+                Hint.gameObject.SetActive(false);
+            }
+            else
+            {
+                GetTopCard().ShowHint(false);
+            }
+               
+            return;
+        }
+
+        if (GetTopCard() == null)
+        {
+            Hint.gameObject.SetActive(CanTakeCard(card));
+        }
+        else
+        {
+            GetTopCard().ShowHint(CanTakeCard(card));
+        }
+    }
     public bool CanTakeCard(Card card)
     {
         switch(PileType)
@@ -112,15 +177,15 @@ public class CardPile : MonoBehaviour
             case PILE_TYPE.FOUNDATION:
             case PILE_TYPE.DECK:
                 Vector3 offsetAmount = new Vector3(0f, .01f, .01f);
-                return ((transform.childCount - 1) * offsetAmount) + transform.position + offset;
+                return ((HeldCards.childCount - 1) * offsetAmount) + transform.position + offset;
             case PILE_TYPE.HOLDER:
             case PILE_TYPE.PLAYER:
                 Vector3 holderOffsetAmount = new Vector3(0f, .2f, -.55f);
-                return ((transform.childCount - 1) * holderOffsetAmount) + transform.position + offset;
+                return ((HeldCards.childCount - 1) * holderOffsetAmount) + transform.position + offset;
            
             case PILE_TYPE.HAND:
                 Vector3 handOffset = new Vector3(0f, .01f, .0f);
-                return ((transform.childCount - 1) * handOffset) + transform.position + offset;
+                return ((HeldCards.childCount - 1) * handOffset) + transform.position + offset;
 
         }
         return transform.position + offset;
@@ -129,28 +194,28 @@ public class CardPile : MonoBehaviour
 
     public bool HasCards()
     {
-        return transform.childCount > 0;
+        return HeldCards.childCount > 0;
     }
     public Card GetTopCard()
     {
-        if (transform.childCount <= 0)
+        if (HeldCards.childCount <= 0)
         {
             return null;
         }
-        return transform.GetChild(transform.childCount - 1).GetComponent<Card>();
+        return HeldCards.GetChild(HeldCards.childCount - 1).GetComponent<Card>();
     }
     public Card GetBottomCard()
     {
-        if (transform.childCount <= 0)
+        if (HeldCards.childCount <= 0)
         {
             return null;
         }
-        return transform.GetChild(0).GetComponent<Card>();
+        return HeldCards.GetChild(0).GetComponent<Card>();
     }
     public IEnumerator AttemptFlipExposedCard()
     {
         //Debug.Log("Attempt to flip exposed card" + gameObject.name);
-        if (transform.childCount == 0)
+        if (HeldCards.childCount == 0)
         {
             yield return null;
         }

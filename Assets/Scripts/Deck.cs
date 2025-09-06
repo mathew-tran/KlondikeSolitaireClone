@@ -86,7 +86,7 @@ public class Deck : MonoBehaviour
             else
             {
                 List<Transform> cards = new List<Transform>();
-                foreach (Transform child in HandPile.transform)
+                foreach (Transform child in HandPile.HeldCards.transform)
                 {
                     cards.Add(child);
                 }

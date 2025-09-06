@@ -53,6 +53,9 @@ public class Card : MonoBehaviour
 
     public GameObject Highlight;
     public GameObject Outline;
+    public GameObject Hint;
+
+    public CardPile CardPileRef;
     public float GetSpeed(MOVE_SPEED speedType)
     {
         switch(speedType)
@@ -103,14 +106,19 @@ public class Card : MonoBehaviour
         GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
         Highlight.GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
         Outline.GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
+        Hint.GetComponent<Renderer>().material.renderQueue = RenderQueueLayer + amount;
     }
 
     public CardPile GetCardPile()
     {
-        return transform.parent.GetComponent<CardPile>();
+        return CardPileRef;
     }
 
 
+    public void ShowHint(bool bShow)
+    {
+        Hint.gameObject.SetActive(bShow);
+    }
 
     public void SetTargetability(bool bIsTargetable)
     {

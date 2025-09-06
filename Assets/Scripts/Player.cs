@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,18 @@ public class Player : MonoBehaviour
 
     public bool bCanPlay = true;
 
+    public Action OnPlayerGainedPile;
+
+    private CardPile PlayerPile;
+
+    private void Awake()
+    {
+        PlayerPile = GetComponent<CardPile>();
+    }
+    public CardPile GetPlayerCardPile()
+    {
+        return PlayerPile;
+    }
     public void SetPlayerCanPlay(bool bPlayable)
     {
         bCanPlay = bPlayable;
@@ -25,7 +38,7 @@ public class Player : MonoBehaviour
         {
             return false;
         }
-        if (GetComponent<CardPile>().HasCards())
+        if (PlayerPile.HasCards())
         {
             return false;
         }
@@ -44,7 +57,7 @@ public class Player : MonoBehaviour
         }
         
         
-        if (GetComponent<CardPile>().HasCards() == false)
+        if (PlayerPile.HasCards() == false)
         {
             if (card.CanDrag())
             {
@@ -64,7 +77,7 @@ public class Player : MonoBehaviour
 
                     foreach (Card foundCards in LastPile.GetCardAndSiblings(card))
                     {
-                        StartCoroutine(GetComponent<CardPile>().TakeCard(foundCards));
+                        StartCoroutine(PlayerPile.TakeCard(foundCards));
                     }
                     
                     return true;
@@ -78,11 +91,11 @@ public class Player : MonoBehaviour
                 if (card.CanDrag())
                 {
                     
-                    while(GetComponent<CardPile>().GetBottomCard())
+                    while(PlayerPile.GetBottomCard())
                     {
-                        if (card.GetCardPile().CanTakeCard(GetComponent<CardPile>().GetBottomCard()))
+                        if (card.GetCardPile().CanTakeCard(PlayerPile.GetBottomCard()))
                         {
-                            StartCoroutine(card.GetCardPile().TakeCard(GetComponent<CardPile>().GetBottomCard()));
+                            StartCoroutine(card.GetCardPile().TakeCard(PlayerPile.GetBottomCard()));
                         }
                         else
                         {
@@ -109,16 +122,16 @@ public class Player : MonoBehaviour
             return false;
         }
 
-        if (GetComponent<CardPile>().HasCards())
+        if (PlayerPile.HasCards())
         {
             if (Input.GetMouseButton(0) == false)
             {
                
                 
-                while (GetComponent<CardPile>().GetBottomCard())
+                while (PlayerPile.GetBottomCard())
                 {
-                    if (cardPile.CanTakeCard(GetComponent<CardPile>().GetBottomCard())) { 
-                        StartCoroutine(cardPile.TakeCard(GetComponent<CardPile>().GetBottomCard()));
+                    if (cardPile.CanTakeCard(PlayerPile.GetBottomCard())) { 
+                        StartCoroutine(cardPile.TakeCard(PlayerPile.GetBottomCard()));
                     }
                     else
                     {
@@ -172,9 +185,9 @@ public class Player : MonoBehaviour
             {
                 child.GetComponent<Card>().AdjustRenderLayer(0);
                 child.gameObject.layer = LayerMask.NameToLayer("Card");
-                while (GetComponent<CardPile>().GetBottomCard())
+                while (PlayerPile.GetBottomCard())
                 {
-                    StartCoroutine(LastPile.TakeCard(GetComponent<CardPile>().GetBottomCard()));
+                    StartCoroutine(LastPile.TakeCard(PlayerPile.GetBottomCard()));
                 }
             }
         }

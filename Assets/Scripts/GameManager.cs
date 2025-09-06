@@ -62,8 +62,24 @@ public class GameManager : MonoBehaviour
     {
         PlayerReference.SetPlayerCanPlay(false);
     }
+
+    public void CheckForPlayerHints()
+    {
+        CardPile cardPile = PlayerReference.GetPlayerCardPile();
+        Card card = null;
+        if (cardPile.HasCards())
+        {
+             card = cardPile.GetBottomCard();
+        }
+
+        foreach (CardPile pile in CardPiles)
+        {            
+            pile.AttemptToShowHint(card);            
+        }
+    }
     public void CheckGameOver()
     {
+        CheckForPlayerHints();
         if (DeckReference.DeckState == Deck.DECK_STATE.NON_INITIALIZED)
         {
             return;
