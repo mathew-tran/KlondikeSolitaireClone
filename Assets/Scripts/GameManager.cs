@@ -80,6 +80,11 @@ public class GameManager : MonoBehaviour
     public void CheckGameOver()
     {
         CheckForPlayerHints();
+        if (PlayerReference.GetPlayerCardPile().HasCards() == false)
+        {
+            DeckReference.DeckClickIfEmpty();
+        }
+        
         if (DeckReference.DeckState == Deck.DECK_STATE.NON_INITIALIZED)
         {
             return;

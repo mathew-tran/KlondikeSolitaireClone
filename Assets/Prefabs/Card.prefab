@@ -65,6 +65,7 @@ MonoBehaviour:
   Highlight: {fileID: 1299406139164095764}
   Outline: {fileID: 2098777617610847085}
   Hint: {fileID: 5913131166148661232}
+  CardPileRef: {fileID: 0}
   MoveState: 0
   FlipState: 0
   RenderQueueLayer: 0
@@ -266,7 +267,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &729902421869920075
 Transform:
   m_ObjectHideFlags: 0

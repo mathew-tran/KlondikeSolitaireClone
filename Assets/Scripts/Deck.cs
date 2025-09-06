@@ -72,6 +72,13 @@ public class Deck : MonoBehaviour
         }
     }
 
+    public void DeckClickIfEmpty()
+    {
+        if (HandPile.HeldCards.transform.childCount == 0)
+        {
+            StartCoroutine(DeckClicked());
+        }
+    }
     public IEnumerator DeckClicked()
     {
         if (DeckState == DECK_STATE.INITIALIZED)
@@ -81,7 +88,6 @@ public class Deck : MonoBehaviour
             if (TopCard)
             {
                 yield return StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.FAST));
-
             }
             else
             {
@@ -104,6 +110,11 @@ public class Deck : MonoBehaviour
                     yield return StartCoroutine(CardHolder.TakeCard(child.GetComponent<Card>(), MOVE_SPEED.SUPERFAST));
                 }
                 yield return new WaitForSeconds(.2f);
+                TopCard = GetTopCard();
+                if (TopCard)
+                {
+                    yield return StartCoroutine(HandPile.TakeCardAndFlip(true, TopCard, MOVE_SPEED.FAST));
+                }
             }
             DeckState = DECK_STATE.INITIALIZED;
         }
