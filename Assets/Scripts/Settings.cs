@@ -12,6 +12,17 @@ public class Settings : MonoBehaviour
         Instance = this;
     }
 
+    public void SetPlaySFX(bool playSFX)
+    {
+        PlayerPrefs.SetInt("bPlaySFX", playSFX ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public bool GetPlaySFX()
+    {
+        return PlayerPrefs.GetInt("bPlaySFX", 1) == 1;
+    }
+
     public void SetAutoDraw(bool autoDraw)
     {
         PlayerPrefs.SetInt("bAutoDraw", autoDraw ? 1 : 0);

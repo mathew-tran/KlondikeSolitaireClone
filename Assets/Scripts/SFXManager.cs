@@ -42,6 +42,10 @@ public class SFXManager : MonoBehaviour
     }
     public void PlayDragSFX(Vector3 pos)
     {
+        if (Settings.GetInstance().GetPlaySFX() == false)
+        {
+            return;
+        }
         StopAllSounds();
         DragCardSFX.pitch = Random.Range(.8f, 1.2f);
         DragCardSFX.gameObject.transform.position = pos;
@@ -50,6 +54,11 @@ public class SFXManager : MonoBehaviour
 
     public void PlayCardPlaceSFX(Vector3 pos)
     {
+        if (Settings.GetInstance().GetPlaySFX() == false)
+        {
+            return;
+        }
+
         StopAllSounds();
         DragCardSFX.pitch = Random.Range(1f, 1.2f);
         PlaceCardSFX.gameObject.transform.position = pos;
@@ -58,6 +67,11 @@ public class SFXManager : MonoBehaviour
 
     public void PlayFlipCardSFX(Vector3 pos)
     {
+        if (Settings.GetInstance().GetPlaySFX() == false)
+        {
+            return;
+        }
+
         StopAllSounds();
         DragCardSFX.pitch = Random.Range(.6f, .8f);
         FlipCardSFX.gameObject.transform.position = pos;

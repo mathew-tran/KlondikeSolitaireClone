@@ -6,16 +6,24 @@ public class PauseMenu : MonoBehaviour
 {
     public TMP_Text Text;
     public Button RetryButtonReference;
+    public GamesWonText GamesWonText;
 
     public bool bIsComplete = false;
+    public AudioSource WinSound;
 
 
+    [ContextMenu("OnWin")]
     public void OnWin()
     {
         SetupWinScreen();
         gameObject.SetActive(false);
         Toggle();
         bIsComplete = true;
+
+        if (Settings.GetInstance().GetPlaySFX())
+        {
+            WinSound.Play();
+        }
 
 
     }
@@ -38,10 +46,12 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
+
     private void SetupWinScreen()
     {
         Text.text = "YOU WIN";
         RetryButtonReference.gameObject.SetActive(false);
+        GamesWonText.Show();
 
     }
 }
