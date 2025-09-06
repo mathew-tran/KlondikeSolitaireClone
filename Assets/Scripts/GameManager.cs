@@ -108,9 +108,16 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyUp(KeyCode.Escape) || Input.GetKeyUp(KeyCode.P))
+        if (Input.GetKeyUp(KeyCode.Escape) || Input.GetKeyUp(KeyCode.P) || Input.GetKeyUp(KeyCode.Tab))
         {
             PauseMenuReference.Toggle();
+        }
+        if (PauseMenuReference.gameObject.activeSelf)
+        {
+            if (Input.GetKeyUp(KeyCode.R))
+            {
+                Restart();
+            }
         }
     }
     private void OnDeckSetupComplete()
